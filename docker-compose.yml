@@ -1,0 +1,20 @@
+services:
+
+  db:
+    image: postgres
+    restart: always
+    shm_size: 128mb
+
+    environment:
+      POSTGRES_DB: PomodoroPro
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: Le-serafim1
+    ports:
+      - "5432:5432"
+
+  cache:
+    image: redis:7.2.4-alpine
+    restart: always
+    ports:
+      - "6379:6379"
+
