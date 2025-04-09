@@ -2,9 +2,9 @@ from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from database import get_async_session
-from repository import TaskRepository, CategoryRepository, TaskCache
+from repository import TaskRepository, CategoryRepository, TaskCache, UserRepository
 from cache import get_redis_connection
-from service import TaskService
+from service import TaskService, UserService, AuthService
 
 
 async def get_task_repository(
@@ -31,4 +31,26 @@ async def get_task_service(
     return TaskService(
         task_repository=task_repository,
         task_cache=task_cache
+    )
+
+
+async def get_user_repository(
+        session: AsyncSession = Depends(get_async_session)
+) -> UserRepository:
+    return UserRepository(session)
+
+
+async def get_user_service(
+        user_repository: UserRepository = Depends(get_user_repository)
+) -> UserService:
+    return UserService(
+        user_repository=user_repository
+    )
+
+
+async def get_auth_service(
+        user_repository: UserRepository = Depends(get_user_repository)
+) -> AuthService:
+    return AuthService(
+        user_repository=user_repository
     )

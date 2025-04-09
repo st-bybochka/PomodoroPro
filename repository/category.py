@@ -1,7 +1,7 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from repository import BaseRepository
-from database import Categories
+from models import Categories
 
 
 class CategoryRepository(BaseRepository):
