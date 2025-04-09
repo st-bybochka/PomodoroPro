@@ -1,5 +1,5 @@
 from repository.base import BaseRepository
-from database import Tasks
+from models import Tasks
 from sqlalchemy.ext.asyncio import AsyncSession
 
 

@@ -8,7 +8,7 @@ class TaskService:
     task_repository: TaskRepository
     task_cache: TaskCache
 
-    async def get_tasks(self):
+    async def get_tasks(self) -> list[TaskSchema]:
         if tasks := self.task_cache.get_tasks():
             return tasks
 

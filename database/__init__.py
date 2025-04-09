@@ -1,4 +1,3 @@
-from database.models import Tasks, Categories, Base
-from database.database import get_async_session
+from database.database import get_async_session, Base
 
-__all__ = ['Tasks', 'Categories', 'get_async_session', 'Base']
+__all__ = ['get_async_session', 'Base']
