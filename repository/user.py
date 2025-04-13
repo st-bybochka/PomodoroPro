@@ -10,11 +10,10 @@ from models import UserProfile
 class UserRepository:
     session: AsyncSession
 
-    async def create_user(self, username: str, password: str, access_token: str) -> UserProfile:
+    async def create_user(self, username: str, password: str) -> UserProfile:
         query = insert(UserProfile).values(
             username=username,
             password=password,
-            access_token=access_token
         ).returning(UserProfile.id)
 
         result = await self.session.execute(query)

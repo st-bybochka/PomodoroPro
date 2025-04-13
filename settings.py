@@ -13,10 +13,16 @@ class Settings(BaseSettings):
     CACHE_PORT: int
     CACHE_DB: int
 
-    model_config = SettingsConfigDict(env_file=".env")
+    JWT_SECRET_KEY: str
+    ALGORITHM: str
+
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8"
+    )
 
     @property
-    def get_database_url(self):
+    def get_database_url(self) -> str:
         return f"{self.DB_DRIVER}://{self.DB_USER}:{self.DB_PASS}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
 
 
