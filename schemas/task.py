@@ -7,6 +7,7 @@ class TaskSchema(BaseModel):
     name: str | None = None
     pomodoro_count: int | None = None
     category_id: int
+    user_id: int
 
     class Config:
         from_attributes = True
@@ -18,19 +19,7 @@ class TaskSchema(BaseModel):
         return self
 
 
-class TaskReadSchema(TaskSchema):
-    id: int
-
-    model_config = {
-        "from_attributes": True
-    }
-
-
-class TaskUpdateSchema(BaseModel):
-    name: Optional[str] = Field(default=None)
-    pomodoro_count: Optional[int] = Field(default=None)
-    category_id: Optional[int] = Field(default=None)
-
-    model_config = {
-        "from_attributes": True
-    }
+class TaskCreateSchema(BaseModel):
+    name: str | None = None
+    pomodoro_count: int | None = None
+    category_id: int

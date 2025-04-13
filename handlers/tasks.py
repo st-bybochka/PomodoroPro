@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Depends, status, HTTPException
-from typing import List, Annotated
+from typing import Annotated
 
-from schemas import TaskSchema, TaskReadSchema, TaskUpdateSchema
-from repository import TaskRepository
-from dependencies import get_task_repository, get_task_service
+from exceptions import TaskNotFound
+from schemas import TaskSchema, TaskCreateSchema
+from dependencies import get_task_service, get_request_user_id
 from service import TaskService
 
 router = APIRouter(
@@ -12,7 +12,7 @@ router = APIRouter(
 )
 
 
-@router.get("/", response_model=List[TaskReadSchema])
+@router.get("/")
 async def get_tasks(
         task_service: Annotated[TaskService, Depends(get_task_service)],
 ):
@@ -20,45 +20,46 @@ async def get_tasks(
 
 
 
-@router.post("/", status_code=status.HTTP_201_CREATED)
+@router.post("/",
+             response_model=TaskSchema
+)
 async def create_task(
-        task: TaskSchema,
-        repo: TaskRepository = Depends(get_task_repository)
+        body: TaskCreateSchema,
+        task_service: Annotated[TaskService, Depends(get_task_service)],
+        user_id: int = Depends(get_request_user_id)
 ):
-    await repo.add(**task.dict())
+    task = await task_service.create_task(body, user_id)
+    return task
 
 
-@router.patch("/{task_id}")
+@router.patch("/{task_id}",
+              response_model=TaskSchema)
 async def update_task(
         task_id: int,
-        update_data: TaskUpdateSchema,
-        repo: TaskRepository = Depends(get_task_repository)
+        name: str,
+        task_service: Annotated[TaskService, Depends(get_task_service)],
+        user_id: int = Depends(get_request_user_id)
 ):
-
-    if not update_data.dict(exclude_unset=True):
-        raise HTTPException(
-            status_code=400,
-            detail="No data to update")
-
-    task = await repo.get_by_id(task_id)
-    if not task:
+    try:
+        return await task_service.update_task_name(task_id, name, user_id)
+    except TaskNotFound as e:
         raise HTTPException(
             status_code=404,
-            detail=f"Task withid {task_id} not found")
+            detail=e.detail
+        )
 
-    await repo.update(task_id, **update_data.dict(exclude_unset=True))
-    return {"messsage": f"Task updated successfully, task_id {task_id}"}
+
 
 
 @router.delete("/{task_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_task(
         task_id: int,
-        repo: TaskRepository = Depends(get_task_repository)
+        task_service: Annotated[TaskService, Depends(get_task_service)],
+        user_id: int = Depends(get_request_user_id)
 ):
-    task = await repo.get_by_id(task_id)
-    if not task:
+    try:
+        await task_service.delete_task(task_id, user_id)
+    except TaskNotFound as e:
         raise HTTPException(
             status_code=404,
-            detail=f"Task with id {task_id} not found")
-
-    await repo.delete(task_id)
+            detail=e.detail)
