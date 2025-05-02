@@ -1,6 +1,7 @@
 from fastapi import Depends, Request, security, Security, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from client import GoogleScient
 from database import get_async_session
 from exceptions import TokenExpired, TokenNotCorrect
 from repository import TaskRepository, TaskCache, UserRepository
@@ -25,6 +26,9 @@ async def get_cache_task_repository() -> TaskCache:
     redis_connection = get_redis_connection()
     return TaskCache(redis_connection)
 
+async def get_google_client() -> GoogleScient:
+    return GoogleScient()
+
 
 async def get_task_service(
         task_repository: TaskRepository = Depends(get_task_repository),
@@ -38,10 +42,12 @@ async def get_task_service(
 
 async def get_auth_service(
         user_repository: UserRepository = Depends(get_user_repository),
+        google_client: GoogleScient = Depends(get_google_client)
 ) -> AuthService:
     return AuthService(
         user_repository=user_repository,
-        settings=settings
+        settings=settings,
+        google_client=google_client,
     )
 
 
@@ -77,5 +83,7 @@ async def get_request_user_id(
             detail=e.detail
         )
     return user_id
+
+
 
 
